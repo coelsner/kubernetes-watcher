@@ -3,11 +3,11 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/util/homedir"
 	"log"
 	"os"
 	"os/signal"
@@ -29,11 +29,12 @@ func main() {
 	flag.Parse()
 
 	// AUTHENTICATE
-	var home = homedir.HomeDir()
-	var kubeconfig = filepath.Join(home, ".kube", "config")
+	var kubeconfig = filepath.Join("/", ".kube", "config")
+	fmt.Printf("%v\n", kubeconfig)
+
 	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
 	if err != nil {
-		panic(err.Error())
+		log.Panicf("Could not load config: %v\n", err.Error())
 	}
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
