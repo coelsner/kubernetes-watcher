@@ -3,25 +3,23 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/rest"
 	"log"
 	"os"
 	"os/signal"
-	"path/filepath"
 )
 
 var (
-	InfoLogger = log.New(os.Stdout, "INFO ", log.LstdFlags)
-	ErrorLogger = log.New(os.Stdout, "ERROR ", log.LstdFlags)
+	InfoLogger   = log.New(os.Stdout, "INFO ", log.LstdFlags)
+	ErrorLogger  = log.New(os.Stdout, "ERROR ", log.LstdFlags)
 	EventsLogger = log.New(os.Stdout, "EVENT ", log.LstdFlags)
 )
 
 var (
-	namespace = flag.String("namespace", "default", "namespace to be watched")
+	namespace    = flag.String("namespace", "default", "namespace to be watched")
 	withServices = flag.Bool("enable-svc", false, "enabling watching services")
 )
 
@@ -29,13 +27,11 @@ func main() {
 	flag.Parse()
 
 	// AUTHENTICATE
-	var kubeconfig = filepath.Join("/", ".kube", "config")
-	fmt.Printf("%v\n", kubeconfig)
-
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	config, err := rest.InClusterConfig()
 	if err != nil {
 		log.Panicf("Could not load config: %v\n", err.Error())
 	}
+
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		panic(err.Error())
