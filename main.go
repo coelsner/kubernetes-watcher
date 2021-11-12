@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	namespace    = flag.String("namespace", "default", "namespace to be watched")
+	namespace = flag.String("namespace", "default", "namespace to be watched")
 )
 
 func main() {
@@ -22,7 +22,7 @@ func main() {
 	log.Printf("Using Namespace: %v\n", *namespace)
 
 	webhookUrl, isPresent := os.LookupEnv("WEBHOOK_URL")
-	if  !isPresent {
+	if !isPresent {
 		log.Fatalf("WEBHOOK_URL must be set")
 	}
 
@@ -73,4 +73,3 @@ func main() {
 
 	log.Println("Stopped watching kubernetes")
 }
-

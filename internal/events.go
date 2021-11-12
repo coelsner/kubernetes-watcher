@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"context"
@@ -7,10 +7,10 @@ import (
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
 	typed "k8s.io/client-go/kubernetes/typed/core/v1"
-	"kubernetes-watcher/teams"
+	"kubernetes-watcher/internal/teams"
 )
 
-func events(ctx context.Context, client typed.CoreV1Interface, namespace string) error {
+func WatchEvents(ctx context.Context, client typed.CoreV1Interface, namespace string) error {
 	var api = client.Events(namespace)
 	var resourceVersion, err = getResourceVersion(api.List(ctx, metaV1.ListOptions{}))
 	if err != nil {
