@@ -7,9 +7,10 @@ import (
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
 	typed "k8s.io/client-go/kubernetes/typed/core/v1"
+	"kubernetes-watcher/teams"
 )
 
-func pods(ctx context.Context, client typed.CoreV1Interface, namespace string) error {
+func pods(ctx context.Context, client typed.CoreV1Interface, namespace string, webhook teams.Webhook) error {
 	var api = client.Pods(namespace)
 	var resourceVersion, err = getResourceVersion(api.List(ctx, metaV1.ListOptions{}))
 	if err != nil {
@@ -22,11 +23,11 @@ func pods(ctx context.Context, client typed.CoreV1Interface, namespace string) e
 		return err
 	}
 
-	go watching("pods", ctx, watcher.ResultChan(), onPodsEvent)
+	go watching("pods", ctx, watcher.ResultChan(), onPodsEvent, webhook)
 	return nil
 }
 
-func onPodsEvent(event watch.Event) error {
+func onPodsEvent(event watch.Event, webhook teams.Webhook) error {
 	pod, ok := event.Object.(*coreV1.Pod)
 	if !ok {
 		return fmt.Errorf("Could not cast to Pod: %v\n", event)
@@ -34,11 +35,11 @@ func onPodsEvent(event watch.Event) error {
 
 	switch event.Type {
 	case watch.Added:
-		EventsLogger.Printf("POD %v was added\n", pod.Name)
+		webhook.Publish("POD %v was added\n", pod.Name)
 	case watch.Modified:
-		EventsLogger.Printf("POD %v was modified\n", pod.Name)
+		webhook.Publish("POD %v was modified\n", pod.Name)
 	case watch.Deleted:
-		EventsLogger.Printf("POD %v was deleted\n", pod.Name)
+		webhook.Publish("POD %v was deleted\n", pod.Name)
 	}
 
 	switch pod.Status.Phase {
