@@ -26,6 +26,8 @@ var (
 func main() {
 	flag.Parse()
 
+	InfoLogger.Printf("Using Namespace: %v\n", *namespace)
+
 	// AUTHENTICATE
 	config, err := rest.InClusterConfig()
 	if err != nil {
