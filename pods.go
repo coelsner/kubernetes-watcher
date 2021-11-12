@@ -32,6 +32,15 @@ func onPodsEvent(event watch.Event) error {
 		return fmt.Errorf("Could not cast to Pod: %v\n", event)
 	}
 
+	switch event.Type {
+	case watch.Added:
+		EventsLogger.Printf("POD %v was added\n", pod.Name)
+	case watch.Modified:
+		EventsLogger.Printf("POD %v was modified\n", pod.Name)
+	case watch.Deleted:
+		EventsLogger.Printf("POD %v was deleted\n", pod.Name)
+	}
+
 	switch pod.Status.Phase {
 	case coreV1.PodFailed:
 		EventsLogger.Printf("POD '%v' has failed: %v\n", pod.Name, pod.Status.Message)
