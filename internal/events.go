@@ -7,7 +7,7 @@ import (
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
 	typed "k8s.io/client-go/kubernetes/typed/core/v1"
-	"kubernetes-watcher/internal/teams"
+	"kubernetes-watcher/internal/hooks"
 )
 
 func WatchEvents(ctx context.Context, client typed.CoreV1Interface, namespace string) error {
@@ -27,7 +27,7 @@ func WatchEvents(ctx context.Context, client typed.CoreV1Interface, namespace st
 	return nil
 }
 
-func onEventEvent(watcherEvent watch.Event, _ teams.Webhook) error {
+func onEventEvent(watcherEvent watch.Event, _ hooks.Webhook) error {
 	event, ok := watcherEvent.Object.(*coreV1.Event)
 	if !ok {
 		return fmt.Errorf("Could not cast to Event: %v\n", watcherEvent)

@@ -4,7 +4,7 @@ import (
 	"context"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
-	"kubernetes-watcher/internal/teams"
+	"kubernetes-watcher/internal/hooks"
 	"log"
 	"os"
 )
@@ -23,7 +23,7 @@ func getResourceVersion(meta metaV1.ListMetaAccessor, err error) (string, error)
 	}
 }
 
-func watching(label string, ctx context.Context, ch <-chan watch.Event, onEvent func(watch.Event, teams.Webhook) error, webhook teams.Webhook) {
+func watching(label string, ctx context.Context, ch <-chan watch.Event, onEvent func(watch.Event, hooks.Webhook) error, webhook hooks.Webhook) {
 	for {
 		select {
 		case event := <-ch:

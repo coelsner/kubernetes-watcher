@@ -7,10 +7,10 @@ import (
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
 	typed "k8s.io/client-go/kubernetes/typed/core/v1"
-	"kubernetes-watcher/internal/teams"
+	"kubernetes-watcher/internal/hooks"
 )
 
-func WatchPods(ctx context.Context, client typed.CoreV1Interface, namespace string, webhook teams.Webhook) error {
+func WatchPods(ctx context.Context, client typed.CoreV1Interface, namespace string, webhook hooks.Webhook) error {
 	var api = client.Pods(namespace)
 	var resourceVersion, err = getResourceVersion(api.List(ctx, metaV1.ListOptions{}))
 	if err != nil {
@@ -27,7 +27,7 @@ func WatchPods(ctx context.Context, client typed.CoreV1Interface, namespace stri
 	return nil
 }
 
-func onPodsEvent(event watch.Event, webhook teams.Webhook) error {
+func onPodsEvent(event watch.Event, webhook hooks.Webhook) error {
 	pod, ok := event.Object.(*coreV1.Pod)
 	if !ok {
 		return fmt.Errorf("Could not cast to Pod: %v\n", event)

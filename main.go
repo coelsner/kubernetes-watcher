@@ -6,7 +6,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"kubernetes-watcher/internal"
-	"kubernetes-watcher/internal/teams"
+	"kubernetes-watcher/internal/hooks"
 	"log"
 	"os"
 	"os/signal"
@@ -27,7 +27,7 @@ func main() {
 	}
 
 	log.Printf("Using webhook: %v\n", webhookUrl)
-	webhook := teams.New(webhookUrl)
+	webhook := hooks.NewStdOutHook()
 
 	// AUTHENTICATE
 	config, err := rest.InClusterConfig()
