@@ -1,5 +1,5 @@
 package hooks
 
 type Webhook interface {
-	Publish(format string, a ...interface{})
+	Publish(title string, text string, a ...interface{}) error
 }

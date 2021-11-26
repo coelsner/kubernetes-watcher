@@ -21,13 +21,16 @@ func main() {
 
 	log.Printf("Using Namespace: %v\n", *namespace)
 
-	webhookUrl, isPresent := os.LookupEnv("WEBHOOK_URL")
-	if !isPresent {
-		log.Fatalf("WEBHOOK_URL must be set")
-	}
+	var webhook hooks.Webhook
 
-	log.Printf("Using webhook: %v\n", webhookUrl)
-	webhook := hooks.NewStdOutHook()
+	webhookUrl, isPresent := os.LookupEnv("WEBHOOK_URL")
+	if isPresent && webhookUrl != "" {
+		log.Printf("Using webhook: '%v'\n", webhookUrl)
+		webhook = hooks.NewTeamsHook(webhookUrl)
+	} else {
+		log.Printf("No webhook url found. Using stdout")
+		webhook = hooks.NewStdOutHook()
+	}
 
 	// AUTHENTICATE
 	config, err := rest.InClusterConfig()

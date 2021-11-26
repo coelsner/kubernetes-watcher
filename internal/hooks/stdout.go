@@ -1,6 +1,7 @@
 package hooks
 
 import (
+	"fmt"
 	"log"
 	"os"
 )
@@ -15,6 +16,7 @@ func NewStdOutHook() Webhook {
 	return &stdOutHook{}
 }
 
-func (s *stdOutHook) Publish(format string, a ...interface{}) {
-	logger.Printf(format, a...)
+func (s *stdOutHook) Publish(title string, text string, a ...interface{}) error {
+	logger.Printf("%s: %s", title, fmt.Sprintf(text, a...))
+	return nil
 }

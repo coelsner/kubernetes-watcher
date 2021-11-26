@@ -33,13 +33,19 @@ func onPodsEvent(event watch.Event, webhook hooks.Webhook) error {
 		return fmt.Errorf("Could not cast to Pod: %v\n", event)
 	}
 
+	var err error
+
 	switch event.Type {
 	case watch.Added:
-		webhook.Publish("POD %v was added\n", pod.Name)
+		err = webhook.Publish("Pod added", "POD %v was added\n", pod.Name)
 	case watch.Modified:
-		webhook.Publish("POD %v was modified\n", pod.Name)
+		err = webhook.Publish("Pod modified", "POD %v was modified\n", pod.Name)
 	case watch.Deleted:
-		webhook.Publish("POD %v was deleted\n", pod.Name)
+		err = webhook.Publish("Pod deleted", "POD %v was deleted\n", pod.Name)
+	}
+
+	if err != nil {
+		ErrorLogger.Printf("Could not publish: %v\n", err)
 	}
 
 	switch pod.Status.Phase {
