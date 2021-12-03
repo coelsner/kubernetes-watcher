@@ -1,52 +1,30 @@
 package hooks
 
 import (
-	"bytes"
 	"context"
 	"fmt"
-	"html/template"
-	"net/http"
+	"kubernetes-watcher/internal/hooks/teams"
 	"time"
 )
 
 type teamsHook struct {
-	url string
+	client *teams.Client
 }
 
 func NewTeamsHook(url string) Webhook {
-	return &teamsHook{url: url}
+	return &teamsHook{client: teams.NewClient(url)}
 }
 
 func (t *teamsHook) Publish(title string, text string, a ...interface{}) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	tpl, err := template.New("message").Parse(`{
-  "@context": "https://schema.org/extensions",
-  "@type": "MessageCard",
-  "themeColor": "0072C6",
-  "title": "{{ .Title }}",
-  "text": "{{ .Text }}",
-}`)
-	content := struct {
-		Title string
-		Text  string
-	}{title, fmt.Sprintf(text, a)}
+	content := teams.Content{Color: "0072C6", Title: title, Text: fmt.Sprintf(text, a...)}
 
-	var buf bytes.Buffer
-	_ = tpl.Execute(&buf, content)
-
-	req, err := http.NewRequestWithContext(ctx, "POST", t.url, bytes.NewReader(buf.Bytes()))
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := http.DefaultClient.Do(req)
+	buf, err := teams.NewPodMessage(content)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Resp: %v\n", resp.Status)
-	return nil
+	return t.client.Post(ctx, buf.Bytes())
 }

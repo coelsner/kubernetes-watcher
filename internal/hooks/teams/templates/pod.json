@@ -1,0 +1,7 @@
+{
+  "@context": "https://schema.org/extensions",
+  "@type": "MessageCard",
+  "themeColor": "{{ .Color }}",
+  "title": "{{ .Title }}",
+  "text": "{{ .Text }}"
+}
