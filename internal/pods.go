@@ -28,32 +28,30 @@ func WatchPods(ctx context.Context, client typed.CoreV1Interface, namespace stri
 }
 
 func onPodsEvent(event watch.Event, webhook hooks.Webhook) error {
-	pod, ok := event.Object.(*coreV1.Pod)
-	if !ok {
-		return fmt.Errorf("Could not cast to Pod: %v\n", event)
-	}
-
-	var err error
+	var title, text string
 
 	switch event.Type {
 	case watch.Added:
-		err = webhook.Publish("Pod added", "POD %v was added\n", pod.Name)
+		title, text = "Added", fmt.Sprintf("New State: %v", event.Object)
 	case watch.Modified:
-		err = webhook.Publish("Pod modified", "POD %v was modified\n", pod.Name)
+		title, text = "Modified", fmt.Sprintf("New State: %v", event.Object)
 	case watch.Deleted:
-		err = webhook.Publish("Pod deleted", "POD %v was deleted\n", pod.Name)
+		title, text = "Deleted", fmt.Sprintf("State before deletion: %v", event.Object)
+	case watch.Error:
+		title, text = "Error", fmt.Sprintf("Error: %v", event.Object)
 	}
 
-	if err != nil {
-		ErrorLogger.Printf("Could not publish: %v\n", err)
+	pod, ok := event.Object.(*coreV1.Pod)
+	if ok {
+		switch pod.Status.Phase {
+		case coreV1.PodFailed:
+			message := fmt.Sprintf("POD '%v' has failed: %v\n", pod.Name, pod.Status.Message)
+			text = fmt.Sprintf("%s (%s)", message, text)
+		case coreV1.PodSucceeded:
+			message := fmt.Sprintf("POD '%v' was successful\n", pod.Name)
+			text = fmt.Sprintf("%s (%s)", message, text)
+		}
 	}
 
-	switch pod.Status.Phase {
-	case coreV1.PodFailed:
-		EventsLogger.Printf("POD '%v' has failed: %v\n", pod.Name, pod.Status.Message)
-	case coreV1.PodSucceeded:
-		EventsLogger.Printf("POD '%v' was successful\n", pod.Name)
-	}
-
-	return nil
+	return webhook.Publish(title, text)
 }
